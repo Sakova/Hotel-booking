@@ -208,6 +208,7 @@ DEPENDENCIES
   rack-cors
   rails (~> 7.0.4)
   rubocop-rails
+  sprockets-rails
   tzinfo-data
 
 RUBY VERSION
