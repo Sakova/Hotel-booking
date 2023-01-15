@@ -5,6 +5,7 @@ ruby '3.0.0'
 
 gem 'bcrypt'
 gem 'bootsnap', require: false
+gem 'jwt'
 gem 'graphql'
 gem 'pg', '~> 1.1'
 gem 'puma', '~> 5.0'
