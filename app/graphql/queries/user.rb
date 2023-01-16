@@ -6,9 +6,11 @@ module Queries
     argument :id, Integer, required: true
 
     def resolve(id:)
-      return unless context[:current_user]&.admin?
+      raise StandardError unless context[:current_user]&.admin?
 
       ::User.find(id)
+    rescue StandardError
+      GraphQL::ExecutionError.new('You should be authenticated as admin to perform this action')
     end
   end
 end
