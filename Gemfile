@@ -5,13 +5,14 @@ ruby '3.0.0'
 
 gem 'bcrypt'
 gem 'bootsnap', require: false
-gem 'jwt'
 gem 'graphql'
+gem 'jwt'
 gem 'pg', '~> 1.1'
 gem 'puma', '~> 5.0'
 gem 'rack-cors'
 gem 'rails', '~> 7.0.4'
 gem 'rubocop-rails', require: false
+gem 'search_object_graphql'
 gem 'sprockets-rails'
 gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]
 
