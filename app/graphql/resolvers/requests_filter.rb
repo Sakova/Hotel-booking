@@ -8,7 +8,7 @@ module Resolvers
 
     description 'Lists requests (admin only)'
 
-    scope { Request.all }
+    scope { context[:current_user]&.admin? ? Request.all : raise('You are not admin to perform this action') }
 
     class DateFilter < ::Types::BaseInputObject
       argument :time_start, String, required: true
@@ -18,8 +18,8 @@ module Resolvers
     class OrderEnum < Types::BaseEnum
       graphql_name 'RequestOrder'
 
-      value 'RECENT'
       value 'OLD'
+      value 'RECENT'
       value 'MORE_PLACES'
       value 'LESS_PLACES'
       value 'TOP_CLASS_ROOMS'
@@ -35,7 +35,7 @@ module Resolvers
     option :comment, type: String, with: :apply_comment_filter
     option :payed, type: String, with: :apply_payed_filter
     option :not_payed, type: String, with: :apply_not_payed_filter
-    option :order, type: OrderEnum, default: 'RECENT'
+    option :order, type: OrderEnum, default: 'OLD'
 
     def apply_id_filter(scope, value)
       scope.where id: value
@@ -73,12 +73,12 @@ module Resolvers
       Request.includes(:bill).all.filter { |r| r.bill.nil? }
     end
 
-    def apply_order_with_recent(_)
-      Request.order created_at: :desc
-    end
-
     def apply_order_with_old(_)
       Request.order created_at: :asc
+    end
+
+    def apply_order_with_recent(_)
+      Request.order created_at: :desc
     end
 
     def apply_order_with_more_places(_)
