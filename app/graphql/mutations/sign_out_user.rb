@@ -1,12 +1,15 @@
 module Mutations
   class SignOutUser < BaseMutation
-    null true
+    null false
+    field :success, Boolean, null: false
 
     def resolve
-      return unless context[:current_user]
+      raise('There is no auth user') unless context[:current_user]
 
       context[:session][:token] = nil
       context[:current_user] = nil
+
+      { success: true }
     end
   end
 end
