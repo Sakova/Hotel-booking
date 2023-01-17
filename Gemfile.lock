@@ -179,6 +179,10 @@ GEM
       rack (>= 1.1)
       rubocop (>= 1.7.0, < 2.0)
     ruby-progressbar (1.11.0)
+    search_object (1.2.5)
+    search_object_graphql (1.0.4)
+      graphql (> 1.8)
+      search_object (~> 1.2.2)
     sprockets (4.2.0)
       concurrent-ruby (~> 1.0)
       rack (>= 2.2.4, < 4)
@@ -212,6 +216,7 @@ DEPENDENCIES
   rack-cors
   rails (~> 7.0.4)
   rubocop-rails
+  search_object_graphql
   sprockets-rails
   tzinfo-data
 
