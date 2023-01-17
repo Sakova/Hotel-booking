@@ -1,5 +1,7 @@
 module Mutations
   class CreateUser < BaseMutation
+    description 'Create user'
+
     class AuthProviderSignupData < Types::BaseInputObject
       argument :credentials, Types::AuthProviderCredentialsInput, required: false
     end

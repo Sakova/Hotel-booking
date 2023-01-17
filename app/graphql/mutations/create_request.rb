@@ -1,5 +1,7 @@
 module Mutations
   class CreateRequest < BaseMutation
+    description 'Create request'
+
     null true
     argument :places_amount, Integer, required: true
     argument :room_class, Integer, required: true
