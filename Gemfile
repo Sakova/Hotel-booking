@@ -7,6 +7,7 @@ gem 'bcrypt'
 gem 'bootsnap', require: false
 gem 'graphql'
 gem 'jwt'
+gem 'money-rails'
 gem 'pg', '~> 1.1'
 gem 'puma', '~> 5.0'
 gem 'rack-cors'
