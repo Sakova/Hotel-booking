@@ -8,7 +8,7 @@ RSpec.describe Mutations::CreateBill, type: :graphql do
 
   it 'creates request returning created request' do
     result = HotelBookingSchema.execute(create_request_query, variables: {
-                                          input: { userId: user.id, requestId: request.id,
+                                          input: { price: room.price.to_i, userId: user.id, requestId: request.id,
                                                    roomId: room.id }
                                         }, context: { current_user: admin })
 
@@ -20,7 +20,7 @@ RSpec.describe Mutations::CreateBill, type: :graphql do
   it 'returns an error when current user is not admin' do
     expect do
       HotelBookingSchema.execute(create_request_query, variables: {
-                                   input: { userId: user.id, requestId: request.id,
+                                   input: { price: room.price.to_i, userId: user.id, requestId: request.id,
                                             roomId: room.id }
                                  }, context: { current_user: user })
     end.to raise_error(RuntimeError)
