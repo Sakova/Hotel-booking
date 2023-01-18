@@ -1,5 +1,5 @@
 class Room < ApplicationRecord
-  has_many :bills, dependent: :destroy
+  has_many :bills, dependent: :nullify
 
   validates :room_number, uniqueness: true
 
