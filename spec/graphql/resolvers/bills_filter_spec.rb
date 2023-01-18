@@ -4,6 +4,7 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
   let(:user) { users(:test) }
   let(:admin) { users(:test_admin) }
   let(:bill) { bills(:first_bill) }
+  let(:high_price_bill) { bills(:third_bill) }
   let(:room) { rooms(:first_room) }
 
   describe 'userId filter' do
@@ -97,6 +98,44 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
           query {
             billsFilter(order: RECENT) {
               id
+              user {
+                id
+              }
+            }
+          }
+        GQL
+
+        result = HotelBookingSchema.execute(query, context: { current_user: admin })
+
+        expect(result.dig('data', 'billsFilter')[0]['id']).to eq(bill.id.to_s)
+        expect(result.dig('data', 'billsFilter')[0]['user']['id']).to eq(user.id.to_s)
+      end
+
+      it 'takes HIGH_PRICE order and returning requests sorting by HIGH PRICE records' do
+        query = <<~GQL
+          query {
+            billsFilter(order: HIGH_PRICE) {
+              id
+              price
+              user {
+                id
+              }
+            }
+          }
+        GQL
+
+        result = HotelBookingSchema.execute(query, context: { current_user: admin })
+
+        expect(result.dig('data', 'billsFilter')[0]['id']).to eq(high_price_bill.id.to_s)
+        expect(result.dig('data', 'billsFilter')[0]['user']['id']).to eq(user.id.to_s)
+      end
+
+      it 'takes HIGH_PRICE order and returning requests sorting by HIGH PRICE records' do
+        query = <<~GQL
+          query {
+            billsFilter(order: LOW_PRICE) {
+              id
+              price
               user {
                 id
               }
