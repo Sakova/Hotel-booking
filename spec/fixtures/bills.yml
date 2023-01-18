@@ -1,0 +1,14 @@
+first_bill:
+  request: first_request
+  room: first_room
+  user: test
+
+second_bill:
+  request: second_request
+  room: second_room
+  user: test
+
+third_bill:
+  request: third_request
+  room: third_room
+  user: test
