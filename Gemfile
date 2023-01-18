@@ -11,6 +11,7 @@ gem 'pg', '~> 1.1'
 gem 'puma', '~> 5.0'
 gem 'rack-cors'
 gem 'rails', '~> 7.0.4'
+gem 'rspec-rails'
 gem 'rubocop-rails', require: false
 gem 'search_object_graphql'
 gem 'sprockets-rails'
