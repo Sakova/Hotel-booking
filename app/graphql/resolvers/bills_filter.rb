@@ -15,6 +15,8 @@ module Resolvers
 
       value 'OLD'
       value 'RECENT'
+      value 'HIGH_PRICE'
+      value 'LOW_PRICE'
     end
 
     option :user_id, type: Integer, with: :apply_user_id_filter
@@ -35,6 +37,14 @@ module Resolvers
 
     def apply_order_with_recent(_)
       Bill.order created_at: :desc
+    end
+
+    def apply_order_with_high_price(_)
+      Bill.order price_cents: :desc
+    end
+
+    def apply_order_with_low_price(_)
+      Bill.order price_cents: :asc
     end
   end
 end
