@@ -29,10 +29,10 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
 
     context 'with authenticated user' do
       it 'returns an error' do
-        expect do
-          HotelBookingSchema.execute(query, variables: { id: request.id },
-                                            context: { current_user: user })
-        end.to raise_error(RuntimeError)
+        result = HotelBookingSchema.execute(query, variables: { id: request.id },
+                                                   context: { current_user: user })
+
+        expect(result['errors'].first['message']).to eq('You need to authenticate as admin to perform this action')
       end
     end
   end
@@ -60,10 +60,10 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
 
     context 'with authenticated user' do
       it 'returns an error' do
-        expect do
-          HotelBookingSchema.execute(query, variables: { places: request.places_amount },
-                                            context: { current_user: user })
-        end.to raise_error(RuntimeError)
+        result = HotelBookingSchema.execute(query, variables: { places: request.places_amount },
+                                                   context: { current_user: user })
+
+        expect(result['errors'].first['message']).to eq('You need to authenticate as admin to perform this action')
       end
     end
   end
@@ -91,10 +91,10 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
 
     context 'with authenticated user' do
       it 'returns an error' do
-        expect do
-          HotelBookingSchema.execute(query, variables: { timeFrom: request.stay_time_from.to_s },
-                                            context: { current_user: user })
-        end.to raise_error(RuntimeError)
+        result = HotelBookingSchema.execute(query, variables: { timeFrom: request.stay_time_from.to_s },
+                                                    context: { current_user: user })
+
+        expect(result['errors'].first['message']).to eq('You need to authenticate as admin to perform this action')
       end
     end
   end
@@ -122,10 +122,10 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
 
     context 'with authenticated user' do
       it 'returns an error' do
-        expect do
-          HotelBookingSchema.execute(query, variables: { timeTo: request.stay_time_to.to_s },
+        result = HotelBookingSchema.execute(query, variables: { timeTo: request.stay_time_to.to_s },
                                             context: { current_user: user })
-        end.to raise_error(RuntimeError)
+
+        expect(result['errors'].first['message']).to eq('You need to authenticate as admin to perform this action')
       end
     end
   end
@@ -154,11 +154,11 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
 
     context 'with authenticated user' do
       it 'returns an error' do
-        expect do
-          HotelBookingSchema.execute(query, variables: { timeStart: request.stay_time_from.to_s,
-                                                         timeEnd: (request.stay_time_to + 1).to_s },
+        result = HotelBookingSchema.execute(query, variables: { timeStart: request.stay_time_from.to_s,
+                                                                timeEnd: (request.stay_time_to + 1).to_s },
                                             context: { current_user: user })
-        end.to raise_error(RuntimeError)
+
+        expect(result['errors'].first['message']).to eq('You need to authenticate as admin to perform this action')
       end
     end
   end
@@ -186,10 +186,10 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
 
     context 'with authenticated user' do
       it 'returns an error' do
-        expect do
-          HotelBookingSchema.execute(query, variables: { comment: request.comment },
+        result = HotelBookingSchema.execute(query, variables: { comment: request.comment },
                                             context: { current_user: user })
-        end.to raise_error(RuntimeError)
+
+        expect(result['errors'].first['message']).to eq('You need to authenticate as admin to perform this action')
       end
     end
   end
@@ -216,9 +216,9 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
 
     context 'with authenticated user' do
       it 'returns an error' do
-        expect do
-          HotelBookingSchema.execute(query, context: { current_user: user })
-        end.to raise_error(RuntimeError)
+        result = HotelBookingSchema.execute(query, context: { current_user: user })
+
+        expect(result['errors'].first['message']).to eq('You need to authenticate as admin to perform this action')
       end
     end
   end
@@ -245,9 +245,9 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
 
     context 'with authenticated user' do
       it 'returns an error' do
-        expect do
-          HotelBookingSchema.execute(query, context: { current_user: user })
-        end.to raise_error(RuntimeError)
+        result = HotelBookingSchema.execute(query, context: { current_user: user })
+
+        expect(result['errors'].first['message']).to eq('You need to authenticate as admin to perform this action')
       end
     end
   end
@@ -362,9 +362,9 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
           }
         GQL
 
-        expect do
-          HotelBookingSchema.execute(query, context: { current_user: user })
-        end.to raise_error(RuntimeError)
+        result = HotelBookingSchema.execute(query, context: { current_user: user })
+
+        expect(result['errors'].first['message']).to eq('You need to authenticate as admin to perform this action')
       end
     end
   end
