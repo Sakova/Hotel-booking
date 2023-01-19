@@ -8,7 +8,7 @@ module Resolvers
 
     description 'Lists bills (admin only)'
 
-    scope { context[:current_user]&.admin? ? Bill.all : raise('You are not auth as admin to perform this action') }
+    scope { check_admin! ? Bill.all : nil }
 
     class OrderEnum < Types::BaseEnum
       graphql_name 'BillsOrder'
