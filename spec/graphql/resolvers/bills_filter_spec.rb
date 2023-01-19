@@ -75,75 +75,44 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
 
   describe 'order sorting' do
     context 'with authenticated admin' do
+      query = <<~GQL
+        query($order: [String!]) {
+          billsFilter(order: $order) {
+            id
+            user {
+              id
+            }
+          }
+        }
+      GQL
+
       it 'takes OLD order and returning requests sorting by OLD records' do
-        query = <<~GQL
-          query {
-            billsFilter(order: OLD) {
-              id
-              user {
-                id
-              }
-            }
-          }
-        GQL
-
-        result = HotelBookingSchema.execute(query, context: { current_user: admin })
-
-        expect(result.dig('data', 'billsFilter')[0]['id']).to eq(bill.id.to_s)
-        expect(result.dig('data', 'billsFilter')[0]['user']['id']).to eq(user.id.to_s)
-      end
-
-      it 'takes RECENT order and returning requests sorting by RECENT records' do
-        query = <<~GQL
-          query {
-            billsFilter(order: RECENT) {
-              id
-              user {
-                id
-              }
-            }
-          }
-        GQL
-
-        result = HotelBookingSchema.execute(query, context: { current_user: admin })
-
-        expect(result.dig('data', 'billsFilter')[0]['id']).to eq(bill.id.to_s)
-        expect(result.dig('data', 'billsFilter')[0]['user']['id']).to eq(user.id.to_s)
-      end
-
-      it 'takes HIGH_PRICE order and returning requests sorting by HIGH PRICE records' do
-        query = <<~GQL
-          query {
-            billsFilter(order: HIGH_PRICE) {
-              id
-              price
-              user {
-                id
-              }
-            }
-          }
-        GQL
-
-        result = HotelBookingSchema.execute(query, context: { current_user: admin })
+        result = HotelBookingSchema.execute(query, variables: { order: 'HIGH_PRICE' },
+                                                   context: { current_user: admin })
 
         expect(result.dig('data', 'billsFilter')[0]['id']).to eq(high_price_bill.id.to_s)
         expect(result.dig('data', 'billsFilter')[0]['user']['id']).to eq(user.id.to_s)
       end
 
-      it 'takes HIGH_PRICE order and returning requests sorting by HIGH PRICE records' do
-        query = <<~GQL
-          query {
-            billsFilter(order: LOW_PRICE) {
-              id
-              price
-              user {
-                id
-              }
-            }
-          }
-        GQL
+      it 'takes RECENT order and returning requests sorting by RECENT records' do
+        result = HotelBookingSchema.execute(query, variables: { order: 'RECENT' },
+                                                   context: { current_user: admin })
 
-        result = HotelBookingSchema.execute(query, context: { current_user: admin })
+        expect(result.dig('data', 'billsFilter')[0]['id']).to eq(bill.id.to_s)
+        expect(result.dig('data', 'billsFilter')[0]['user']['id']).to eq(user.id.to_s)
+      end
+
+      it 'takes HIGH_PRICE order and returning requests sorting by HIGH PRICE records' do
+        result = HotelBookingSchema.execute(query, variables: { order: 'HIGH_PRICE' },
+                                                   context: { current_user: admin })
+
+        expect(result.dig('data', 'billsFilter')[0]['id']).to eq(high_price_bill.id.to_s)
+        expect(result.dig('data', 'billsFilter')[0]['user']['id']).to eq(user.id.to_s)
+      end
+
+      it 'takes LOW_PRICE order and returning requests sorting by LOW PRICE records' do
+        result = HotelBookingSchema.execute(query, variables: { order: 'LOW_PRICE' },
+                                                   context: { current_user: admin })
 
         expect(result.dig('data', 'billsFilter')[0]['id']).to eq(bill.id.to_s)
         expect(result.dig('data', 'billsFilter')[0]['user']['id']).to eq(user.id.to_s)
@@ -154,7 +123,7 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
       it 'returns an error' do
         query = <<~GQL
           query {
-            billsFilter(order: RECENT) {
+            billsFilter(order: "RECENT") {
               id
               user {
                 id
