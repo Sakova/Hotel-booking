@@ -6,22 +6,13 @@ module Resolvers
 
     type [Types::BillType], null: false
 
-    description 'Lists bills (admin only)'
+    description 'Sort and Filter bills (admin only)'
 
-    scope { context[:current_user]&.admin? ? Bill.all : raise('You are not auth as admin to perform this action') }
-
-    class OrderEnum < Types::BaseEnum
-      graphql_name 'BillsOrder'
-
-      value 'OLD'
-      value 'RECENT'
-      value 'HIGH_PRICE'
-      value 'LOW_PRICE'
-    end
+    scope { check_admin! ? Bill.all : nil }
 
     option :user_id, type: Integer, with: :apply_user_id_filter
     option :room_id, type: Integer, with: :apply_room_id_filter
-    option :order, type: OrderEnum, default: 'OLD'
+    option :order, type: [String], with: :apply_order_filter
 
     def apply_user_id_filter(scope, value)
       scope.where user_id: value
@@ -31,20 +22,13 @@ module Resolvers
       scope.where room_id: value
     end
 
-    def apply_order_with_old(_)
-      Bill.order created_at: :asc
-    end
+    def apply_order_filter(_, value)
+      scope = value.include?('OLD') ? Bill.order(created_at: :asc) : Bill
+      scope = scope.order(created_at: :desc) if value.include?('RECENT')
+      scope = scope.order(price_cents: :desc) if value.include?('HIGH_PRICE')
+      scope = scope.order(price_cents: :asc) if value.include?('LOW_PRICE')
 
-    def apply_order_with_recent(_)
-      Bill.order created_at: :desc
-    end
-
-    def apply_order_with_high_price(_)
-      Bill.order price_cents: :desc
-    end
-
-    def apply_order_with_low_price(_)
-      Bill.order price_cents: :asc
+      scope
     end
   end
 end

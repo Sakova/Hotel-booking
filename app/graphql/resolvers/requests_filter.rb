@@ -6,9 +6,9 @@ module Resolvers
 
     type [Types::RequestType], null: false
 
-    description 'Lists requests (admin only)'
+    description 'Sort and Filter requests (admin only)'
 
-    scope { context[:current_user]&.admin? ? Request.all : raise('You are not admin to perform this action') }
+    scope { check_admin! ? Request.all : nil }
 
     class DateFilter < ::Types::BaseInputObject
       argument :time_start, String, required: true
