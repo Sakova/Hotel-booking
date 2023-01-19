@@ -6,7 +6,7 @@ module Resolvers
 
     type [Types::RequestType], null: false
 
-    description 'Lists requests (admin only)'
+    description 'Sort and Filter requests (admin only)'
 
     scope { check_admin! ? Request.all : nil }
 

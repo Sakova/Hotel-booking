@@ -6,7 +6,7 @@ module Resolvers
 
     type [Types::BillType], null: false
 
-    description 'Lists bills (admin only)'
+    description 'Sort and Filter bills (admin only)'
 
     scope { check_admin! ? Bill.all : nil }
 
