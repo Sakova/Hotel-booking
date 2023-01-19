@@ -4,7 +4,6 @@ module Types
     field :user, resolver: Queries::User
     field :requests, resolver: Queries::Requests
     field :requests_filter, resolver: Resolvers::RequestsFilter
-    field :current_user_bills, resolver: Queries::Bills
     field :bills, resolver: Resolvers::BillsFilter
     field :rooms, resolver: Queries::Rooms
   end
