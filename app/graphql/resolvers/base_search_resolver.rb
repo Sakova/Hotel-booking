@@ -5,6 +5,10 @@ module Resolvers
       value 'DESC'
     end
 
+    class EmptyEnum < Types::BaseEnum
+      value 'EMPTY'
+    end
+
     def escape_search_term(term)
       "%#{term.gsub(/\s+/, '%')}%"
     end
