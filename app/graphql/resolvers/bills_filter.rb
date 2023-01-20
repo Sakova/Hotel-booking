@@ -6,7 +6,7 @@ module Resolvers
 
     type [Types::BillType], null: false
 
-    description 'Find, Sort and Filter bills'
+    description 'Find, Sort and Filter bills (only for admin except searching by id)'
 
     scope { Bill.all }
 
