@@ -83,13 +83,13 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
             }
           }
         GQL
-        it 'takes DESC order and returning requests sorting by created_at field' do
+        it 'returns bills sorting by created_at field' do
           expect(subject.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
           expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
         end
       end
 
-      context 'with RECENT order' do
+      context 'with ASC order' do
         let(:query) { <<~GQL }
           query {
             bills(order: [{createdAt: ASC}]) {
@@ -100,13 +100,13 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
             }
           }
         GQL
-        it 'takes ASC order and returning requests sorting by created_at field' do
+        it 'returns bills sorting by created_at field' do
           expect(subject.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
           expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
         end
       end
 
-      context 'with HIGH_PRICE order' do
+      context 'with DESC order' do
         let(:query) { <<~GQL }
           query {
             bills(order: [{priceCents: DESC}]) {
@@ -117,13 +117,13 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
             }
           }
         GQL
-        it 'takes DESC order and returning requests sorting by price_cents field' do
+        it 'returns bills sorting by price_cents field' do
           expect(subject.dig('data', 'bills')[0]['id']).to eq(high_price_bill.id.to_s)
           expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
         end
       end
 
-      context 'with LOW_PRICE order' do
+      context 'with ASC order' do
         let(:query) { <<~GQL }
           query {
             bills(order: [{priceCents: ASC}]) {
@@ -134,7 +134,7 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
             }
           }
         GQL
-        it 'takes ASC order and returning requests sorting by price_cents field' do
+        it 'returns bills sorting by price_cents field' do
           expect(subject.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
           expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
         end
