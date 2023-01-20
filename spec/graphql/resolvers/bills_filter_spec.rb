@@ -7,8 +7,11 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
   let(:high_price_bill) { bills(:third_bill) }
   let(:room) { rooms(:first_room) }
 
+  let(:variables) { {} }
+  subject(:query_result) { HotelBookingSchema.execute(query, variables: variables, context: ctx) }
+
   describe 'userId filter' do
-    query = <<~GQL
+    let(:query) { <<~GQL }
       query($userId: Int) {
         bills(userId: $userId) {
           id
@@ -18,31 +21,27 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
         }
       }
     GQL
+    let(:variables) { { userId: user.id } }
 
     context 'with authenticated admin' do
+      let(:ctx) { { current_user: admin } }
       it 'takes user id and returning bills by user id' do
-
-        result = HotelBookingSchema.execute(query, variables: { userId: user.id },
-                                                   context: { current_user: admin })
-
-        expect(result.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
-        expect(result.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
+        expect(subject.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
+        expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
       end
     end
 
     context 'with authenticated user' do
+      let(:ctx) { { current_user: user } }
       it 'takes user id and returning bills by user id' do
-        result = HotelBookingSchema.execute(query, variables: { userId: user.id },
-                                                   context: { current_user: admin })
-
-        expect(result.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
-        expect(result.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
+        expect(subject.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
+        expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
       end
     end
   end
 
   describe 'roomId filter' do
-    query = <<~GQL
+    let(:query) { <<~GQL }
       query($roomId: Int) {
         bills(roomId: $roomId) {
           id
@@ -52,79 +51,31 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
         }
       }
     GQL
+    let(:variables) { { roomId: room.id } }
 
     context 'with authenticated admin' do
+      let(:ctx) { { current_user: admin } }
       it 'takes room id and returning bills by room id' do
-
-        result = HotelBookingSchema.execute(query, variables: { roomId: room.id },
-                                                   context: { current_user: admin })
-
-        expect(result.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
-        expect(result.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
+        expect(subject.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
+        expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
       end
     end
 
     context 'with authenticated user' do
+      let(:ctx) { { current_user: user } }
       it 'returns an error' do
-        result = HotelBookingSchema.execute(query, variables: { roomId: room.id },
-                                                   context: { current_user: user })
-
-        expect(result['errors'].first['message']).to eq('You need to authenticate as admin to perform this action')
+        expect(subject['errors'].first['message']).to eq('You need to authenticate as admin to perform this action')
       end
     end
   end
 
   describe 'order sorting' do
     context 'with authenticated admin' do
-      query = <<~GQL
-        query($order: [String!]) {
-          bills(order: $order) {
-            id
-            user {
-              id
-            }
-          }
-        }
-      GQL
-
-      it 'takes OLD order and returning requests sorting by OLD records' do
-        result = HotelBookingSchema.execute(query, variables: { order: 'HIGH_PRICE' },
-                                                   context: { current_user: admin })
-
-        expect(result.dig('data', 'bills')[0]['id']).to eq(high_price_bill.id.to_s)
-        expect(result.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
-      end
-
-      it 'takes RECENT order and returning requests sorting by RECENT records' do
-        result = HotelBookingSchema.execute(query, variables: { order: 'RECENT' },
-                                                   context: { current_user: admin })
-
-        expect(result.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
-        expect(result.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
-      end
-
-      it 'takes HIGH_PRICE order and returning requests sorting by HIGH PRICE records' do
-        result = HotelBookingSchema.execute(query, variables: { order: 'HIGH_PRICE' },
-                                                   context: { current_user: admin })
-
-        expect(result.dig('data', 'bills')[0]['id']).to eq(high_price_bill.id.to_s)
-        expect(result.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
-      end
-
-      it 'takes LOW_PRICE order and returning requests sorting by LOW PRICE records' do
-        result = HotelBookingSchema.execute(query, variables: { order: 'LOW_PRICE' },
-                                                   context: { current_user: admin })
-
-        expect(result.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
-        expect(result.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
-      end
-    end
-
-    context 'with authenticated user' do
-      it 'returns an error' do
-        query = <<~GQL
+      let(:ctx) { { current_user: admin } }
+      context 'with DESC order' do
+        let(:query) { <<~GQL }
           query {
-            bills(order: "RECENT") {
+            bills(order: [{createdAt: DESC}]) {
               id
               user {
                 id
@@ -132,10 +83,78 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
             }
           }
         GQL
+        it 'takes DESC order and returning requests sorting by created_at field' do
+          expect(subject.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
+          expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
+        end
+      end
 
-        result = HotelBookingSchema.execute(query, context: { current_user: user })
+      context 'with RECENT order' do
+        let(:query) { <<~GQL }
+          query {
+            bills(order: [{createdAt: ASC}]) {
+              id
+              user {
+                id
+              }
+            }
+          }
+        GQL
+        it 'takes ASC order and returning requests sorting by created_at field' do
+          expect(subject.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
+          expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
+        end
+      end
 
-        expect(result['errors'].first['message']).to eq('You need to authenticate as admin to perform this action')
+      context 'with HIGH_PRICE order' do
+        let(:query) { <<~GQL }
+          query {
+            bills(order: [{priceCents: DESC}]) {
+              id
+              user {
+                id
+              }
+            }
+          }
+        GQL
+        it 'takes DESC order and returning requests sorting by price_cents field' do
+          expect(subject.dig('data', 'bills')[0]['id']).to eq(high_price_bill.id.to_s)
+          expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
+        end
+      end
+
+      context 'with LOW_PRICE order' do
+        let(:query) { <<~GQL }
+          query {
+            bills(order: [{priceCents: ASC}]) {
+              id
+              user {
+                id
+              }
+            }
+          }
+        GQL
+        it 'takes ASC order and returning requests sorting by price_cents field' do
+          expect(subject.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
+          expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
+        end
+      end
+    end
+
+    context 'with authenticated user' do
+      let(:ctx) { { current_user: user } }
+      let(:query) { <<~GQL }
+        query {
+          bills(order: [{createdAt: ASC}]) {
+            id
+            user {
+              id
+            }
+          }
+        }
+      GQL
+      it 'returns an error' do
+        expect(subject['errors'].first['message']).to eq('You need to authenticate as admin to perform this action')
       end
     end
   end
