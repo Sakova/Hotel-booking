@@ -4,17 +4,22 @@ RSpec.describe Queries::Rooms, type: :graphql do
   let(:user) { users(:test) }
   let(:admin) { users(:test_admin) }
 
-  it 'returns array of rooms' do
-    result = HotelBookingSchema.execute(rooms_query, context: { current_user: admin })
+  let(:variables) { {} }
+  subject(:query_subject) { HotelBookingSchema.execute(rooms_query, variables: variables, context: ctx) }
 
-    expect(result.dig('data', 'rooms').length).to eq(rooms.length)
+  context 'with authenticated admin' do
+    let(:ctx) { { current_user: admin } }
+    it 'returns array of rooms' do
+      expect(subject.dig('data', 'rooms').length).to eq(rooms.length)
+    end
   end
 
-  it 'returns an error when current user is not admin' do
-    result = HotelBookingSchema.execute(rooms_query, context: { current_user: user })
-
-    expect(result.dig('data', 'rooms')).to be_nil
-    expect(result['errors'].first['message']).to eq('You should be auth as admin to perform this action')
+  context 'with authenticated user' do
+    let(:ctx) { { current_user: user } }
+    it 'returns an error' do
+      expect(subject.dig('data', 'rooms')).to be_nil
+      expect(subject['errors'].first['message']).to eq('You should be auth as admin to perform this action')
+    end
   end
 
   def rooms_query
