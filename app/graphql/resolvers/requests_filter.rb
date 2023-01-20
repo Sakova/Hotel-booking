@@ -6,7 +6,7 @@ module Resolvers
 
     type [Types::RequestType], null: false
 
-    description 'Sort and Filter requests (admin only)'
+    description 'List, Find, Sort and Filter requests (admin only)'
 
     scope { check_admin! ? Request.all : nil }
 
@@ -15,17 +15,13 @@ module Resolvers
       argument :time_end, String, required: true
     end
 
-    class OrderEnum < Types::BaseEnum
-      graphql_name 'RequestOrder'
-
-      value 'OLD'
-      value 'RECENT'
-      value 'MORE_PLACES'
-      value 'LESS_PLACES'
-      value 'TOP_CLASS_ROOMS'
-      value 'LOWER_CLASS_ROOMS'
+    class RequestOrderSort < ::Types::BaseInputObject
+      argument :created_at, BaseSearchResolver::OrderEnum, required: false
+      argument :places_amount, BaseSearchResolver::OrderEnum, required: false
+      argument :room_class, BaseSearchResolver::OrderEnum, required: false
     end
 
+    option :all_requests, type: BaseSearchResolver::EmptyEnum
     option :id, type: Integer, with: :apply_id_filter
     option :places_amount, type: Integer, with: :apply_places_amount_filter
     option :room_class, type: Integer, with: :apply_room_class_filter
@@ -33,9 +29,13 @@ module Resolvers
     option :stay_time_to, type: String, with: :apply_stay_time_to_filter
     option :stay_between_time, type: DateFilter, with: :apply_stay_between_time_filter
     option :comment, type: String, with: :apply_comment_filter
-    option :payed, type: String, with: :apply_payed_filter
-    option :not_payed, type: String, with: :apply_not_payed_filter
-    option :order, type: OrderEnum, default: 'OLD'
+    option :payed, type: BaseSearchResolver::EmptyEnum
+    option :not_payed, type: BaseSearchResolver::EmptyEnum
+    option :order, type: [RequestOrderSort], with: :apply_order_filter
+
+    def apply_all_requests_with_empty(_)
+      ::Request.all
+    end
 
     def apply_id_filter(scope, value)
       scope.where id: value
@@ -65,36 +65,21 @@ module Resolvers
       scope.where 'LOWER(comment) LIKE ?', escape_search_term(value.downcase)
     end
 
-    def apply_payed_filter(_, _)
+    def apply_payed_with_empty(_)
       Request.includes(:bill).all.filter { |r| !r.bill.nil? }
     end
 
-    def apply_not_payed_filter(_, _)
+    def apply_not_payed_with_empty(_)
       Request.includes(:bill).all.filter { |r| r.bill.nil? }
     end
 
-    def apply_order_with_old(_)
-      Request.order created_at: :asc
-    end
+    def apply_order_filter(_, value)
+      value = value[0]
+      scope = value[:created_at].present? ? Request.order(created_at: value[:created_at]) : Request
+      scope = scope.order(places_amount: value[:places_amount]) if value[:places_amount].present?
+      scope = scope.order(room_class: value[:room_class]) if value[:room_class].present?
 
-    def apply_order_with_recent(_)
-      Request.order created_at: :desc
-    end
-
-    def apply_order_with_more_places(_)
-      Request.order places_amount: :desc
-    end
-
-    def apply_order_with_less_places(_)
-      Request.order places_amount: :asc
-    end
-
-    def apply_order_with_top_class_rooms(_)
-      Request.order room_class: :desc
-    end
-
-    def apply_order_with_lower_class_rooms(_)
-      Request.order room_class: :asc
+      scope
     end
   end
 end
