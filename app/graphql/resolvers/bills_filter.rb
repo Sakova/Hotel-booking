@@ -2,7 +2,7 @@ require 'search_object'
 require 'search_object/plugin/graphql'
 
 module Resolvers
-  class BillsFilter < Resolvers::BaseResolver
+  class BillsFilter < Resolvers::BaseSearchResolver
 
     type [Types::BillType], null: false
 
@@ -10,14 +10,9 @@ module Resolvers
 
     scope { Bill.all }
 
-    class OrderEnum < Types::BaseEnum
-      value 'ASC'
-      value 'DESC'
-    end
-
     class OrderSort < ::Types::BaseInputObject
-      argument :created_at, OrderEnum, required: false
-      argument :price_cents, OrderEnum, required: false
+      argument :created_at, BaseSearchResolver::OrderEnum, required: false
+      argument :price_cents, BaseSearchResolver::OrderEnum, required: false
     end
 
     option :user_id, type: Integer, with: :apply_user_id_filter
