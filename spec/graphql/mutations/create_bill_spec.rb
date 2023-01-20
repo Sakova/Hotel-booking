@@ -6,24 +6,28 @@ RSpec.describe Mutations::CreateBill, type: :graphql do
   let(:request) { requests(:first_request) }
   let(:room) { rooms(:first_room) }
 
-  it 'creates request returning created request' do
-    result = HotelBookingSchema.execute(create_request_query, variables: {
-                                          input: { price: room.price.to_i, userId: user.id, requestId: request.id,
-                                                   roomId: room.id }
-                                        }, context: { current_user: admin })
+  let(:variables) do
+    {
+      input: { price: room.price.to_i, userId: user.id, requestId: request.id,
+               roomId: room.id }
+    }
+  end
+  subject(:query_subject) { HotelBookingSchema.execute(create_request_query, variables: variables, context: ctx) }
 
-    expect(result.dig('data', 'createBill', 'user', 'id')).to eq(user.id.to_s)
-    expect(result.dig('data', 'createBill', 'request', 'id')).to eq(request.id.to_s)
-    expect(result.dig('data', 'createBill', 'room', 'id')).to eq(room.id.to_s)
+  context 'with authenticated admin' do
+    let(:ctx) { { current_user: admin } }
+    it 'creates request returning created request' do
+      expect(subject.dig('data', 'createBill', 'user', 'id')).to eq(user.id.to_s)
+      expect(subject.dig('data', 'createBill', 'request', 'id')).to eq(request.id.to_s)
+      expect(subject.dig('data', 'createBill', 'room', 'id')).to eq(room.id.to_s)
+    end
   end
 
-  it 'returns an error when current user is not admin' do
-    expect do
-      HotelBookingSchema.execute(create_request_query, variables: {
-                                   input: { price: room.price.to_i, userId: user.id, requestId: request.id,
-                                            roomId: room.id }
-                                 }, context: { current_user: user })
-    end.to raise_error(RuntimeError)
+  context 'with authenticated user' do
+    let(:ctx) { { current_user: user } }
+    it 'returns an error when current user is not admin' do
+      expect{ subject }.to raise_error(RuntimeError)
+    end
   end
 
   def create_request_query

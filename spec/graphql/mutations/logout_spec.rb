@@ -3,16 +3,21 @@ require 'rails_helper'
 RSpec.describe Mutations::SignOutUser, type: :graphql do
   let(:user) { users(:test) }
 
-  it 'log out the user' do
-    result = HotelBookingSchema.execute(logout_query, context: { current_user: user, session: { token: '' } })
+  let(:variables) { {} }
+  subject(:query_subject) { HotelBookingSchema.execute(logout_query, variables: variables, context: ctx) }
 
-    expect(result.dig('data', 'signoutUser', 'success')).to be_truthy
+  context 'with authenticated user' do
+    let(:ctx) { { current_user: user, session: { token: '' } } }
+    it 'log out the user' do
+      expect(subject.dig('data', 'signoutUser', 'success')).to be_truthy
+    end
   end
 
-  it 'returns an error when no current user' do
-    expect do
-      HotelBookingSchema.execute(logout_query, context: { current_user: nil, session: { token: '' } })
-    end.to raise_error(RuntimeError)
+  context 'without authenticated user' do
+    let(:ctx) { { current_user: nil, session: { token: '' } } }
+    it 'returns an error when no current user' do
+      expect { subject }.to raise_error(RuntimeError)
+    end
   end
 
   def logout_query
