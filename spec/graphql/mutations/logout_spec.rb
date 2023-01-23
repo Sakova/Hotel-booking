@@ -15,8 +15,8 @@ RSpec.describe Mutations::SignOutUser, type: :graphql do
 
   context 'without authenticated user' do
     let(:ctx) { { current_user: nil, session: { token: '' } } }
-    it 'returns an error when no current user' do
-      expect { subject }.to raise_error(RuntimeError)
+    it 'returns message when no current user' do
+      expect(subject.dig('data', 'signoutUser', 'message')).to eq('There is no authenticated user')
     end
   end
 
@@ -26,6 +26,7 @@ RSpec.describe Mutations::SignOutUser, type: :graphql do
         signoutUser(
           input: {}
         ) {
+          message
           success
         }
       }

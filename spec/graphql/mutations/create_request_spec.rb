@@ -17,8 +17,9 @@ RSpec.describe Mutations::CreateRequest, type: :graphql do
         }
       end
       it 'creates request returning created request' do
-        expect(subject.dig('data', 'createRequest', 'roomClass')).to eq('Deluxe')
-        expect(subject.dig('data', 'createRequest', 'comment')).to eq('I need two swimming pools in each room')
+        expect(subject.dig('data', 'createRequest', 'request', 'roomClass')).to eq('Deluxe')
+        expect(subject.dig('data', 'createRequest', 'request', 'comment'))
+          .to eq('I need two swimming pools in each room')
       end
     end
 
@@ -33,8 +34,23 @@ RSpec.describe Mutations::CreateRequest, type: :graphql do
       end
       it 'returns an error when authentications fails' do
         expect(subject['errors'].first['message']).to include('Expected value to not be null')
-        expect(subject.dig('data', 'createRequest')).to be_nil
+        expect(subject.dig('data', 'createRequest', 'request')).to be_nil
       end
+    end
+  end
+
+  context 'without authenticated user' do
+    let(:ctx) { { current_user: nil } }
+    let(:variables) do
+      {
+        input: { placesAmount: 2, roomClass: 3,
+                 stayTimeFrom: (DateTime.now + 1).iso8601,
+                 stayTimeTo: (DateTime.now + 2).iso8601,
+                 comment: 'I need two swimming pools in each room' }
+      }
+    end
+    it 'creates request returning created request' do
+      expect(subject.dig('data', 'createRequest', 'message')).to eq('You are not authenticated to perform this action')
     end
   end
 
@@ -44,8 +60,11 @@ RSpec.describe Mutations::CreateRequest, type: :graphql do
         createRequest(
           input: $input
         ) {
-          roomClass
-          comment
+          message
+          request {
+            roomClass
+            comment
+          }
         }
       }
     GQL
