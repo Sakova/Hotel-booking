@@ -74,12 +74,7 @@ module Resolvers
     end
 
     def apply_order_filter(_, value)
-      value = value[0]
-      scope = value[:created_at].present? ? Request.order(created_at: value[:created_at]) : Request
-      scope = scope.order(places_amount: value[:places_amount]) if value[:places_amount].present?
-      scope = scope.order(room_class: value[:room_class]) if value[:room_class].present?
-
-      scope
+      value[0].to_h.reduce(Request) { |result, i| result.order("#{i[0]}": i[1]) }
     end
   end
 end
