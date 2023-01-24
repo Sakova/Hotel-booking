@@ -5,6 +5,7 @@ ruby '3.0.0'
 
 gem 'bcrypt'
 gem 'bootsnap', require: false
+gem 'annotate'
 gem 'graphql'
 gem 'jwt'
 gem 'money-rails'
