@@ -32,11 +32,7 @@ module Resolvers
     def apply_order_filter(_, value)
       check_admin!
 
-      value = value[0]
-      scope = value[:created_at].present? ? Bill.order(created_at: value[:created_at]) : Bill
-      scope = scope.order(price_cents: value[:price_cents]) if value[:price_cents].present?
-
-      scope
+      value[0].to_h.reduce(Bill) { |result, i| result.order("#{i[0]}": i[1]) }
     end
   end
 end

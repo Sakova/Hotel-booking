@@ -20,8 +20,8 @@ RSpec.describe Mutations::SignInUser, type: :graphql do
       { input: { credentials: { email: 'test@example.com', password: 'bad' } } }
     end
 
-    it 'returns nil when authentications fails' do
-      expect { subject }.to raise_error(RuntimeError)
+    it 'returns message when authentications fails' do
+      expect(subject.dig('data', 'signinUser', 'message')).to eq('Invalid email or password')
     end
   end
 
@@ -31,6 +31,7 @@ RSpec.describe Mutations::SignInUser, type: :graphql do
         signinUser(
           input: $input
         ) {
+          message
           token
         }
       }

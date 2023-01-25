@@ -1,8 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe Queries::User, type: :graphql do
-  let(:user) { users(:test) }
-  let(:admin) { users(:test_admin) }
+  let(:user) { create(:user, :client) }
+  let(:admin) { create(:user, :admin) }
 
   let(:variables) { { id: user.id } }
   subject(:query_subject) { HotelBookingSchema.execute(user_query, variables: variables, context: ctx) }

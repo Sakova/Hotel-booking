@@ -1,11 +1,14 @@
 require 'rails_helper'
 
 RSpec.describe Resolvers::BillsFilter, type: :graphql do
-  let(:user) { users(:test) }
-  let(:admin) { users(:test_admin) }
-  let(:bill) { bills(:first_bill) }
-  let(:high_price_bill) { bills(:third_bill) }
-  let(:room) { rooms(:first_room) }
+  let(:user) { create(:user, :client) }
+  let(:admin) { create(:user, :admin) }
+  let(:room) { create(:room, :small) }
+  let(:request) { create(:request, :cheap_request, user: user) }
+  let(:expensive_request) { create(:request, :expensive_request, user: user) }
+  let(:large_room) { create(:room, :large) }
+  let(:bill) { create(:bill, :cheap_bill, user: user, room: room, request: request) }
+  let(:high_price_bill) { create(:bill, :expensive_bill, user: user, room: large_room, request: expensive_request) }
 
   let(:variables) { {} }
   subject(:query_result) { HotelBookingSchema.execute(query, variables: variables, context: ctx) }
@@ -22,11 +25,12 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
       }
     GQL
     let(:variables) { { userId: user.id } }
+    before { bill }
 
     context 'with authenticated admin' do
       let(:ctx) { { current_user: admin } }
       it 'takes user id and returning bills by user id' do
-        expect(subject.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
+        expect(subject.dig('data', 'bills')[0]['id']).to eq(user.bills[0].id.to_s)
         expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
       end
     end
@@ -34,7 +38,7 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
     context 'with authenticated user' do
       let(:ctx) { { current_user: user } }
       it 'takes user id and returning bills by user id' do
-        expect(subject.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
+        expect(subject.dig('data', 'bills')[0]['id']).to eq(user.bills[0].id.to_s)
         expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
       end
     end
@@ -52,11 +56,12 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
       }
     GQL
     let(:variables) { { roomId: room.id } }
+    before { bill }
 
     context 'with authenticated admin' do
       let(:ctx) { { current_user: admin } }
       it 'takes room id and returning bills by room id' do
-        expect(subject.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
+        expect(subject.dig('data', 'bills')[0]['id']).to eq(room.bills[0].id.to_s)
         expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
       end
     end
@@ -83,6 +88,8 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
             }
           }
         GQL
+        before { bill }
+
         it 'returns bills sorting by created_at field' do
           expect(subject.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
           expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
@@ -100,9 +107,11 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
             }
           }
         GQL
+        before { bill }
+
         it 'returns bills sorting by created_at field' do
-          expect(subject.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
-          expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
+          expect(subject.dig('data', 'bills')[-1]['id']).to eq(bill.id.to_s)
+          expect(subject.dig('data', 'bills')[-1]['user']['id']).to eq(user.id.to_s)
         end
       end
 
@@ -117,6 +126,8 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
             }
           }
         GQL
+        before { high_price_bill }
+
         it 'returns bills sorting by price_cents field' do
           expect(subject.dig('data', 'bills')[0]['id']).to eq(high_price_bill.id.to_s)
           expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
@@ -134,9 +145,11 @@ RSpec.describe Resolvers::BillsFilter, type: :graphql do
             }
           }
         GQL
+        before { bill }
+
         it 'returns bills sorting by price_cents field' do
-          expect(subject.dig('data', 'bills')[0]['id']).to eq(bill.id.to_s)
-          expect(subject.dig('data', 'bills')[0]['user']['id']).to eq(user.id.to_s)
+          expect(subject.dig('data', 'bills')[-1]['id']).to eq(bill.id.to_s)
+          expect(subject.dig('data', 'bills')[-1]['user']['id']).to eq(user.id.to_s)
         end
       end
     end

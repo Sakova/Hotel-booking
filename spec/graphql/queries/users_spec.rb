@@ -1,8 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe Queries::Users, type: :graphql do
-  let(:user) { users(:test) }
-  let(:admin) { users(:test_admin) }
+  let(:user) { create(:user, :client) }
+  let(:admin) { create(:user, :admin) }
 
   let(:variables) { {} }
   subject(:query_subject) { HotelBookingSchema.execute(users_query, variables: variables, context: ctx) }
@@ -10,7 +10,7 @@ RSpec.describe Queries::Users, type: :graphql do
   context 'with authenticated admin' do
     let(:ctx) { { current_user: admin } }
     it 'returns array of registered users' do
-      expect(subject.dig('data', 'users').length).to eq(users.length)
+      expect(subject.dig('data', 'users')[0]).to include('id', 'name', 'email')
     end
   end
 

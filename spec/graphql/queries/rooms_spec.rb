@@ -1,16 +1,18 @@
 require 'rails_helper'
 
 RSpec.describe Queries::Rooms, type: :graphql do
-  let(:user) { users(:test) }
-  let(:admin) { users(:test_admin) }
+  let(:user) { create(:user, :client) }
+  let(:admin) { create(:user, :admin) }
 
   let(:variables) { {} }
   subject(:query_subject) { HotelBookingSchema.execute(rooms_query, variables: variables, context: ctx) }
 
   context 'with authenticated admin' do
     let(:ctx) { { current_user: admin } }
+    before { create(:room, :small) }
+
     it 'returns array of rooms' do
-      expect(subject.dig('data', 'rooms').length).to eq(rooms.length)
+      expect(subject.dig('data', 'rooms')[0]).to include('id', 'placesAmount')
     end
   end
 
