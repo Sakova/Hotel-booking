@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe Mutations::SignOutUser, type: :graphql do
-  let(:user) { users(:test) }
+  let(:user) { create(:user, :client) }
 
   let(:variables) { {} }
   subject(:query_subject) { HotelBookingSchema.execute(logout_query, variables: variables, context: ctx) }

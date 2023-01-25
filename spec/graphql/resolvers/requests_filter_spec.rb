@@ -1,10 +1,12 @@
 require 'rails_helper'
 
 RSpec.describe Resolvers::RequestsFilter, type: :graphql do
-  let(:user) { users(:test) }
-  let(:admin) { users(:test_admin) }
-  let(:request) { requests(:first_request) }
-  let(:request_not_payed) { requests(:not_payed_request) }
+  let(:user) { create(:user, :client) }
+  let(:admin) { create(:user, :admin) }
+  let(:request) { create(:request, :cheap_request, user: user) }
+  let(:most_expensive_request) { create(:request, :most_expensive_request, user: user) }
+  let(:room) { create(:room, :small) }
+  let(:bill) { create(:bill, :cheap_bill, user: user, room: room, request: request) }
 
   let(:variables) { {} }
   subject(:query_subject) { HotelBookingSchema.execute(query, variables: variables, context: ctx) }
@@ -18,6 +20,7 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
         }
       }
     GQL
+    before { request }
 
     context 'with authenticated admin' do
       let(:ctx) { { current_user: admin } }
@@ -209,6 +212,7 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
         }
       }
     GQL
+    before { bill }
 
     context 'with authenticated admin' do
       let(:ctx) { { current_user: admin } }
@@ -235,12 +239,13 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
         }
       }
     GQL
+    before { request }
 
     context 'with authenticated admin' do
       let(:ctx) { { current_user: admin } }
       it 'takes empty string and returning requests with not payed bills' do
-        expect(subject.dig('data', 'requests')[0]['id']).to eq(request_not_payed.id.to_s)
-        expect(subject.dig('data', 'requests')[0]['placesAmount']).to eq(request_not_payed.places_amount)
+        expect(subject.dig('data', 'requests')[0]['id']).to eq(request.id.to_s)
+        expect(subject.dig('data', 'requests')[0]['placesAmount']).to eq(request.places_amount)
       end
     end
 
@@ -264,6 +269,7 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
             }
           }
         GQL
+        before { request }
 
         it 'returns requests sorting by created_at field' do
           expect(subject.dig('data', 'requests')[0]['id']).to eq(request.id.to_s)
@@ -280,10 +286,11 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
             }
           }
         GQL
+        before { request }
 
         it 'returns requests sorting by created_at field' do
-          expect(subject.dig('data', 'requests')[0]['id']).to eq(request.id.to_s)
-          expect(subject.dig('data', 'requests')[0]['placesAmount']).to eq(request.places_amount)
+          expect(subject.dig('data', 'requests')[-1]['id']).to eq(request.id.to_s)
+          expect(subject.dig('data', 'requests')[-1]['placesAmount']).to eq(request.places_amount)
         end
       end
 
@@ -296,10 +303,11 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
             }
           }
         GQL
+        before { most_expensive_request }
 
         it 'returns requests sorting by places_amount field' do
-          expect(subject.dig('data', 'requests')[0]['id']).to eq(request_not_payed.id.to_s)
-          expect(subject.dig('data', 'requests')[0]['placesAmount']).to eq(request_not_payed.places_amount)
+          expect(subject.dig('data', 'requests')[0]['id']).to eq(most_expensive_request.id.to_s)
+          expect(subject.dig('data', 'requests')[0]['placesAmount']).to eq(most_expensive_request.places_amount)
         end
       end
 
@@ -312,6 +320,7 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
             }
           }
         GQL
+        before { request }
 
         it 'returns requests sorting by places_amount field' do
           expect(subject.dig('data', 'requests')[0]['id']).to eq(request.id.to_s)
@@ -328,10 +337,11 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
             }
           }
         GQL
+        before { most_expensive_request }
 
         it 'returns requests sorting by room_class field' do
-          expect(subject.dig('data', 'requests')[0]['id']).to eq(request_not_payed.id.to_s)
-          expect(subject.dig('data', 'requests')[0]['placesAmount']).to eq(request_not_payed.places_amount)
+          expect(subject.dig('data', 'requests')[0]['id']).to eq(most_expensive_request.id.to_s)
+          expect(subject.dig('data', 'requests')[0]['placesAmount']).to eq(most_expensive_request.places_amount)
         end
       end
 
@@ -344,6 +354,7 @@ RSpec.describe Resolvers::RequestsFilter, type: :graphql do
             }
           }
         GQL
+        before { request }
 
         it 'returns requests sorting by LOWER CLASS ROOMS records' do
           expect(subject.dig('data', 'requests')[0]['id']).to eq(request.id.to_s)
