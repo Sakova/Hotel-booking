@@ -3,9 +3,9 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '3.0.0'
 
+gem 'annotate'
 gem 'bcrypt'
 gem 'bootsnap', require: false
-gem 'annotate'
 gem 'graphql'
 gem 'jwt'
 gem 'money-rails'
